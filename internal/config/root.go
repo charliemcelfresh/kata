@@ -17,6 +17,7 @@ var (
 	}
 	Constants = map[string]interface{}{
 		"REQUIRED_API_KATA_REQUEST_CONTENT_TYPE": "application/api.kata-json",
+		"API_KATA_RESPONSE_CONTENT_TYPE":         "application/api.kata-json",
 	}
 	DB *sql.DB
 )
