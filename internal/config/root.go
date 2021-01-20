@@ -24,12 +24,14 @@ var (
 
 func init() {
 	logrus.SetReportCaller(true)
-	err := godotenv.Overload()
-	if err != nil {
-		logrus.Fatal(err)
+	if os.Getenv("KATA_ENV") != "TEST" {
+		err := godotenv.Overload()
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		loadEnvVars()
+		loadConfig()
 	}
-	loadEnvVars()
-	loadConfig()
 }
 
 func loadEnvVars() {

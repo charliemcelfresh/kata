@@ -8,7 +8,21 @@ import (
 	"github.com/charliemcelfresh/kata/internal/config"
 )
 
-func EnforceAPIKataRequestContentType(next http.Handler) http.Handler {
+type Logger interface {
+	Info(...interface{})
+}
+
+type MiddlewareRunner struct {
+	logger Logger
+}
+
+func NewMiddlewareRunner(logger Logger) MiddlewareRunner {
+	return MiddlewareRunner{
+		logger: logger,
+	}
+}
+
+func (m MiddlewareRunner) EnforceAPIKataRequestContentType(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		contentType := r.Header.Get("Content-Type")
 
@@ -24,7 +38,7 @@ func EnforceAPIKataRequestContentType(next http.Handler) http.Handler {
 	})
 }
 
-func AddResponseContentType(next http.Handler) http.Handler {
+func (m MiddlewareRunner) AddResponseContentType(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := w.Header()
 		header.Set("Content-Type", config.Constants["API_KATA_RESPONSE_CONTENT_TYPE"].(string))
@@ -32,11 +46,11 @@ func AddResponseContentType(next http.Handler) http.Handler {
 	})
 }
 
-func LogRequest(next http.Handler) http.Handler {
+func (m MiddlewareRunner) LogRequest(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		fmt.Println(fmt.Sprintf(
+		m.logger.Info(fmt.Sprintf(
 			`timestamp: %v, request_path: %v`,
-			time.RFC3339, r.RequestURI,
+			time.Now(), r.RequestURI,
 		))
 		next.ServeHTTP(w, r)
 	})

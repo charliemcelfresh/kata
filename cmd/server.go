@@ -1,8 +1,11 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"net/http"
+	"os"
+	"os/signal"
 
 	"github.com/charliemcelfresh/kata/internal/middlewares"
 
@@ -28,21 +31,29 @@ func init() {
 }
 
 func serverCmdRunner() {
+	shutdownChannel := make(chan os.Signal, 1)
+	signal.Notify(shutdownChannel, os.Interrupt)
+	serve(logrus.New(), config.Constants["SERVER_PORT"].(string), shutdownChannel)
+}
+
+func serve(logger middlewares.Logger, port string, shutdownChannel chan os.Signal) {
 	mux := http.NewServeMux()
 	rootHandler := http.HandlerFunc(rootHandler)
+	middleware := middlewares.NewMiddlewareRunner(logger)
 	sharedMiddlewares := alice.New(
-		middlewares.AddResponseContentType,
-		middlewares.EnforceAPIKataRequestContentType,
-		middlewares.LogRequest,
+		middleware.AddResponseContentType,
+		middleware.EnforceAPIKataRequestContentType,
+		middleware.LogRequest,
 	)
 	mux.Handle("/", sharedMiddlewares.Then(rootHandler))
 	logrus.Info(fmt.Sprintf("kata server running on %v",
-		config.Constants["SERVER_PORT"]))
+		port))
 
-	err := http.ListenAndServe(fmt.Sprintf("%v", config.Constants["SERVER_PORT"]), mux)
-	if err != nil {
-		logrus.Fatal(err)
-	}
+	server := http.Server{Addr: port, Handler: mux}
+	go server.ListenAndServe()
+
+	<-shutdownChannel
+	server.Shutdown(context.Background())
 }
 
 func rootHandler(w http.ResponseWriter, r *http.Request) {
