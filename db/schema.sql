@@ -25,14 +25,23 @@ COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UU
 
 SET default_tablespace = '';
 
-SET default_table_access_method = heap;
-
 --
 -- Name: schema_migrations; Type: TABLE; Schema: public; Owner: -
 --
 
 CREATE TABLE public.schema_migrations (
     version character varying(255) NOT NULL
+);
+
+
+--
+-- Name: session; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.session (
+    uuid uuid DEFAULT public.uuid_generate_v4() NOT NULL,
+    value text NOT NULL,
+    user_id uuid
 );
 
 
@@ -55,6 +64,14 @@ ALTER TABLE ONLY public.schema_migrations
 
 
 --
+-- Name: session session_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.session
+    ADD CONSTRAINT session_pkey PRIMARY KEY (uuid);
+
+
+--
 -- PostgreSQL database dump complete
 --
 
@@ -64,4 +81,5 @@ ALTER TABLE ONLY public.schema_migrations
 --
 
 INSERT INTO public.schema_migrations (version) VALUES
-    ('20210110002400');
+    ('20210110002400'),
+    ('20210122013657');
