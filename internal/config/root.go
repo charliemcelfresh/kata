@@ -11,9 +11,11 @@ import (
 )
 
 var (
-	requiredEnvVars = [2]string{
+	requiredEnvVars = [4]string{
 		"DATABASE_URL",
 		"SERVER_PORT",
+		"COOKIE_HASH_KEY",
+		"COOKIE_BLOCK_KEY",
 	}
 	Constants = map[string]interface{}{
 		"REQUIRED_API_KATA_REQUEST_CONTENT_TYPE": "application/api.kata-json",
