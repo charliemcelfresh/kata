@@ -41,6 +41,7 @@ func serve(logger middlewares.Logger, port string, shutdownChannel chan os.Signa
 	rootHandler := http.HandlerFunc(rootHandler)
 	middleware := middlewares.NewMiddlewareRunner(logger)
 	sharedMiddlewares := alice.New(
+		middleware.SetCookie,
 		middleware.AddResponseContentType,
 		middleware.EnforceAPIKataRequestContentType,
 		middleware.LogRequest,
